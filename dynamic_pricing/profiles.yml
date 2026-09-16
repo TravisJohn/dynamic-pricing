@@ -1,0 +1,7 @@
+dynamic_pricing:            # must match "profile:" in dbt_project.yml
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: dynamic_pricing.duckdb   # the database file, created on first run
+      threads: 4

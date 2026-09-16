@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Raw ride extract from Kaggle, read straight from the CSV.
+    meta:
+      external_location: "read_csv_auto('../data/{name}.csv')"
+    tables:
+      - name: dynamic_pricing
+        description: One row per historical ride (~1,000 rows).
