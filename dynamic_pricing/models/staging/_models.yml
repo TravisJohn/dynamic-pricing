@@ -1,0 +1,61 @@
+version: 2
+
+models:
+  - name: stg_rides
+    description: >
+      One row per historical ride booking. Raw Kaggle extract with columns renamed,
+      reordered and cast, plus a surrogate key. No business logic.
+    columns:
+
+      - name: ride_id
+        description: >
+          Surrogate key, md5 of all ten source columns. The source has no natural key,
+          so this is built. Content-based, so it is stable if the row order changes.
+        data_tests:
+          - unique
+          - not_null
+
+      # --- the target and its main driver: nothing downstream works without these
+      - name: historical_ride_cost
+        description: What was charged for the ride, in dollars. The modelling target.
+        data_tests:
+          - not_null
+
+      - name: expected_ride_duration_minutes
+        description: Expected trip length in minutes. Explains ~93% of cost today.
+        data_tests:
+          - not_null
+
+      # --- market columns: riders / drivers becomes a ratio in the intermediate layer,
+      #     so a null or a zero driver count would break that division
+      - name: market_driver_count
+        description: Drivers available at booking time (supply).
+        data_tests:
+          - not_null
+
+      - name: market_rider_count
+        description: Riders wanting a ride at booking time (demand).
+        data_tests:
+          - not_null
+
+      # --- categories: these become model features and segment cuts, so an unexpected
+      #     level would silently change a coefficient or split a segment
+      - name: location_category
+        data_tests:
+          - accepted_values:
+              values: ['Urban', 'Suburban', 'Rural']
+
+      - name: vehicle_type
+        data_tests:
+          - accepted_values:
+              values: ['Economy', 'Premium']
+
+      - name: booking_time_of_day
+        data_tests:
+          - accepted_values:
+              values: ['Morning', 'Afternoon', 'Evening', 'Night']
+
+      - name: customer_loyalty_status
+        data_tests:
+          - accepted_values:
+              values: ['Regular', 'Silver', 'Gold']
