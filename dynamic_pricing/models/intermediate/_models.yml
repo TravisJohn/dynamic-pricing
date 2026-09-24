@@ -1,0 +1,43 @@
+version: 2
+
+models:
+  - name: int_ride_market_conditions
+    description: >
+      One row per ride booking, widened with a description of the market
+      conditions at booking time. Same grain as stg_rides. No encoding and no
+      scaling: those are model-specific and fitted, so they live in the
+      pricing pipeline, not in the warehouse.
+    columns:
+
+      # --- the grain contract, carried forward unchanged from staging.
+      #     If this model ever fans out or drops rows, the build fails here
+      #     rather than surfacing as a strange number three layers later.
+      - name: ride_id
+        description: Surrogate key inherited from stg_rides.
+        data_tests:
+          - unique
+          - not_null
+
+      - name: riders_per_driver
+        description: >
+          Demand pressure. Riders divided by available drivers at booking time.
+          The primary market feature; dimensionless and comparable across
+          locations and times of day.
+        data_tests:
+          - not_null
+
+      - name: market_activity_volume
+        description: >
+          Riders plus drivers. The absolute size of the moment, to separate a
+          busy ratio in a large market from the same ratio in a small one.
+        data_tests:
+          - not_null
+
+      - name: market_pressure_band
+        description: >
+          Human-readable pressure label from fixed thresholds on
+          riders_per_driver (<2 Balanced, 2-4 Tight, 4+ Scarce).
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Balanced', 'Tight', 'Scarce']

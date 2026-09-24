@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: fct_rides
+    description: >
+      One row per historical ride booking, with market conditions attached.
+      The serving table for the pricing notebook and any downstream summary.
+      historical_ride_cost is what was charged under the current duration-only
+      policy -- it is the modelling target, not a benchmark of a good price.
+    columns:
+
+      - name: ride_id
+        description: Surrogate key. One row per ride, asserted at every layer.
+        data_tests:
+          - unique
+          - not_null
+
+      - name: riders_per_driver
+        description: Demand pressure at booking time.
+        data_tests:
+          - not_null
+
+      - name: market_pressure_band
+        data_tests:
+          - accepted_values:
+              values: ['Balanced', 'Tight', 'Scarce']
+
+      - name: expected_ride_duration_minutes
+        description: Expected trip length in minutes. Drives the current fare.
+        data_tests:
+          - not_null
+
+      - name: historical_ride_cost
+        description: What was charged, in dollars. The modelling target.
+        data_tests:
+          - not_null
